@@ -3,6 +3,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <time.h>
+#include <string.h>
 
 void print_uid() { // Just print UIDs to see how they change
   uid_t ruid;
@@ -18,7 +20,7 @@ void example_1() { // show suid bit works
 
 void example_2() { // permission lower, raise, drop and try to regain (fail)
   int ret;
-  printf("Starting UIDs: \n")
+  printf("Starting UIDs: \n");
   print_uid();
 
   // set euid to 1000
@@ -48,7 +50,7 @@ void example_2() { // permission lower, raise, drop and try to regain (fail)
   printf("\n\nTry to regain privileges: \n");
   ret = setuid(0);
   printf("setuid(0) return code: %d\n", ret);
-  printf("UIDs unchanged: \n", );
+  printf("UIDs unchanged: \n");
   print_uid();
 }
 
@@ -60,17 +62,23 @@ void example_3() { // strace example
 }
 
 void example_4() { // append to file user data
-  FILE *log;
-  char* pass;
   const char* path = getenv("PASSWORD_LOG_FILE");
-  log = fopen(path, "a");
-  pass = scanf("%s");
-  fprintf(log, "%s\n", pass);
-  fclose(log);
+	char sentence[1000];
+	FILE *fptr;
+	fptr = fopen(path, "a");
+
+	while(1) {
+		printf("Enter sentence to log:\n");
+		fgets(sentence, sizeof(sentence), stdin);
+		if ( strcmp(sentence, "QUIT\n") == 0 ) { break;}
+		fprintf(fptr, "%d : %s", (int)time(NULL), sentence);
+	}
+	fclose(fptr);
 }
 
 void example_5() { // Misuse prevention example:
   // starting euid is 0
+  int ret;
   ret = setuid(1000); // drop privileges
   if (ret != 0) { // Check syscall succeeds
     exit(ret); // exit if fail
@@ -83,10 +91,10 @@ void example_5() { // Misuse prevention example:
 
 int main() {
   pid_t proc_num = getpid();
-  printf("Proccess id: %d", proc_num);
+  printf("Proccess id: %d\n", proc_num);
   int a;
   printf("Enter example number to run: ");
-  scanf("%d", &a)
+  scanf("%d", &a);
   switch (a) {
     case 1:
       example_1();
