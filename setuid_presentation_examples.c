@@ -62,7 +62,7 @@ void example_3() { // strace example
 }
 
 void example_4() { // append to file user data
-  const char* path = getenv("PASSWORD_LOG_FILE");
+  const char* path = getenv("PASSWORD_LOG_FILE"); // must be a file or segfault
 	char sentence[1000];
 	FILE *fptr;
 	fptr = fopen(path, "a");
